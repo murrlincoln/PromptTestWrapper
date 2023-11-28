@@ -1,15 +1,15 @@
-import openai
+from openai import OpenAI
+
+client = OpenAI()
 import json
 
 
 # Function to process each line with OpenAI
 def process_with_openai(task_id, prompt):
     modified_prompt = f"{prompt}\n# Please append example test cases to this prompt that will aid in its ability to be used by an LLM to create functional code. Return the entire JSON as your response."
-    response = openai.Completion.create(
-        model="gpt-3.5-turbo",  # or the model of your choice
-        prompt=modified_prompt,
-        max_tokens=1000  # Adjust as per your requirement
-    )
+    response = client.completions.create(model="gpt-3.5-turbo",  # or the model of your choice
+    prompt=modified_prompt,
+    max_tokens=1000)
     # Extracting only the text part of the response
     text_response = response.choices[0].text.strip()
     # Extracting only the JSON-like part of the response
