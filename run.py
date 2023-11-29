@@ -6,26 +6,22 @@ import json
 
 # Function to process each line with OpenAI
 def process_with_openai(task_id, prompt):
-    modified_prompt = f"{prompt}\n# Please append example test cases to this prompt that will aid in its ability to be used by an LLM to create functional code. Return the entire JSON as your response."
-    response = client.completions.create(model="gpt-3.5-turbo",  # or the model of your choice
-    prompt=modified_prompt,
-    max_tokens=1000)
-    # Extracting only the text part of the response
-    text_response = response.choices[0].text.strip()
-    # Extracting only the JSON-like part of the response
-    start_idx = text_response.find('{')
-    end_idx = text_response.rfind('}')
-    if start_idx != -1 and end_idx != -1:
-        json_like_part = text_response[start_idx:end_idx+1]
-        try:
-            # Try to parse it as JSON to ensure it's valid
-            parsed_json = json.loads(json_like_part)
-            return json.dumps(parsed_json)  # Convert back to string
-        except json.JSONDecodeError:
-            # In case the extracted part is not valid JSON
-            return None
-    else:
-        return None
+    modified_prompt = f"{task_id, prompt}\n# Based on the above programming task, generate practical test cases that would help in verifying the correctness of a solution. Format your response where the value includes the original prompt, entirely unchanged but not including the task id, followed by the generated test cases. Ensure the response is concise and directly usable in a JSON object and will not cause parsing or decoding errors."
+    print(modified_prompt)
+    response = client.chat.completions.create(model="gpt-4",  # or the model of your choice
+    messages=[{
+          "role": "user",
+          "content": modified_prompt
+        }])
+    # Extracting only the JSON-like part of the response that is in the "prompt" part of the JSON object
+    #try:
+    #    response_json = json.loads(response.choices[0].text.strip())
+    #    return response_json.get('prompt', None)  # Return None if 'prompt' key is not found
+    #except json.JSONDecodeError:
+        # Return the text part of the return if no valid JSON is found
+    print(response.choices[0].message.content.strip())
+    return response.choices[0].message.content.strip()
+
 
 # Read from source JSONL and write to destination JSONL
 def process_jsonl(source_file, destination_file):
@@ -38,4 +34,4 @@ def process_jsonl(source_file, destination_file):
             dest.write('\n')
 
 # Replace 'source.jsonl' and 'destination.jsonl' with your filenames
-process_jsonl('source.jsonl', 'destination-3.5.jsonl')
+process_jsonl('sourceTest.jsonl', 'destinationTest.jsonl')
